@@ -1,0 +1,45 @@
+delimiter //
+DROP TRIGGER tgr_log_insercion ;
+
+
+delimiter //
+CREATE TRIGGER tgr_log_insercion BEFORE INSERT ON tbl_cuenta
+FOR EACH ROW
+BEGIN 
+	DECLARE v_datos varchar (4000);
+    SET v_datos := CONCAT(
+    COALESCE(NEW.id_cuenta, ''), ',', COALESCE(NEW.fecha_corte, ''), ',', COALESCE(NEW.fecha_pago, ''), ',', COALESCE(NEW.saldo_anterior, ''), ',',
+    COALESCE(NEW.compras, ''), ',', COALESCE(NEW.retiros, ''), ',', COALESCE(NEW.cuota_financiamiento, ''), ',', COALESCE(NEW.intereses, ''), ',',
+    COALESCE(NEW.otros, ''), ',', COALESCE(NEW.saldo_nuevo, ''), ',', COALESCE(NEW.limite_credito, ''), ',', COALESCE(NEW.credito_disponible, ''), ',',
+    COALESCE(NEW.tasa_interes_anual, ''), ',', COALESCE(NEW.tasa_interes_mensual, ''), ',', COALESCE(NEW.tbl_cliente, '' ) );
+    insert into t_log_inserciones(fecha, tipo_evento, datos )
+	values(now(), 'INSERCION', v_datos ) ;
+    END;
+    //
+
+    
+
+    
+drop table t_log_inserciones ;
+
+CREATE TABLE t_log_inserciones (
+id int AUTO_INCREMENT PRIMARY KEY,
+fecha datetime, tipo_evento varchar (45) , datos varchar (4000)  );
+
+SELECT * FROM t_log_inserciones ;
+
+
+INSERT INTO tbl_cuenta (fecha_corte, fecha_pago, saldo_anterior, compras, retiros, cuota_financiamiento, intereses, otros, saldo_nuevo, limite_credito, credito_disponible, tasa_interes_anual, tbl_cliente)
+VALUES
+('2025-03-03','2025-03-15', 7000.00, 1000.00, 300.00, 160.00, 70.00, 20.00, 7700.00, 10000.00, 4300.00, 18.50, 1);
+
+
+SELECT * FROM tbl_cuenta;
+
+
+
+
+DELETE FROM tbl_cuenta 
+WHERE id_cuenta = 5;
+
+
