@@ -1,0 +1,105 @@
+/* CREACIÓN DE LA BASE DE DATOS */
+CREATE DATABASE IF NOT EXISTS db_estado_cuenta;
+USE db_estado_cuenta;
+
+
+/* creacion de tabla tbl_cliente */
+CREATE TABLE IF NOT EXISTS tbl_cliente (
+    id_cliente INT PRIMARY KEY AUTO_INCREMENT,
+    nombre_cliente VARCHAR(100) NOT NULL,
+    numero_identidad VARCHAR(45) UNIQUE NOT NULL,
+    telefono VARCHAR(15),
+    correo VARCHAR(45),
+    direccion VARCHAR(100)
+);
+
+/* creacion de tabla tbl_cuenta */
+CREATE TABLE IF NOT EXISTS tbl_cuenta (
+    id_cuenta INT PRIMARY KEY AUTO_INCREMENT,
+    fecha_corte DATE NOT NULL,
+    fecha_pago DATE NOT NULL,
+    saldo_anterior DECIMAL(10,2) DEFAULT 0,
+    compras DECIMAL(10,2) DEFAULT 0,
+    retiros DECIMAL(10,2) DEFAULT 0,
+    cuota_financiamiento DECIMAL(10,2) DEFAULT 0,
+    intereses DECIMAL(10,2) DEFAULT 0,
+    otros DECIMAL(10,2) DEFAULT 0,
+    saldo_nuevo DECIMAL(10,2) DEFAULT 0,
+    limite_credito DECIMAL(10,2) NOT NULL,
+    credito_disponible DECIMAL(10,2) NOT NULL CHECK (credito_disponible >= 0),
+    tasa_interes_anual DECIMAL(5,2) NOT NULL,
+    tasa_interes_mensual DECIMAL(5,2) NOT NULL,
+    id_cliente INT,
+    FOREIGN KEY (id_cliente) REFERENCES tbl_cliente(id_cliente) ON DELETE CASCADE
+);
+
+/* creacion de tabla tbl_tarjeta */
+CREATE TABLE IF NOT EXISTS tbl_tarjeta (
+    id_tarjeta INT PRIMARY KEY AUTO_INCREMENT,
+    numero_tarjeta VARCHAR(45) UNIQUE NOT NULL,
+    fecha_emision DATE NOT NULL,
+    id_cliente INT,
+    id_tipo_tarjeta INT,
+    FOREIGN KEY (id_cliente) REFERENCES tbl_cliente(id_cliente) ON DELETE CASCADE,
+    FOREIGN KEY (id_tipo_tarjeta) REFERENCES tbl_tipo_tarjeta(id_tipo_tarjeta)
+);
+
+/* creacion de tabla tbl_tipo_tarjeta */
+CREATE TABLE IF NOT EXISTS tbl_tipo_tarjeta (
+    id_tipo_tarjeta INT PRIMARY KEY AUTO_INCREMENT,
+    nombre_tipo VARCHAR(45) NOT NULL
+);
+
+/* creacion de tabla tbl_puntos */
+CREATE TABLE IF NOT EXISTS tbl_puntos (
+    id_puntos INT PRIMARY KEY AUTO_INCREMENT,
+    saldo_anterior INT DEFAULT 0,
+    puntos_ganados INT DEFAULT 0,
+    puntos_canjeados INT DEFAULT 0,
+    puntos_disponibles INT DEFAULT 0,
+    id_cliente INT,
+    FOREIGN KEY (id_cliente) REFERENCES tbl_cliente(id_cliente) ON DELETE CASCADE
+);
+
+/* creacion de tabla tbl_financiamientos */
+CREATE TABLE IF NOT EXISTS tbl_financiamientos (
+    id_financiamientos INT PRIMARY KEY AUTO_INCREMENT,
+    extra_financiamiento_disponible DECIMAL(10,2) DEFAULT 0,
+    saldo DECIMAL(10,2) DEFAULT 0,
+    id_cliente INT,
+    FOREIGN KEY (id_cliente) REFERENCES tbl_cliente(id_cliente) ON DELETE CASCADE
+);
+
+/*  creacion de tabla tbl_pagos */
+CREATE TABLE IF NOT EXISTS tbl_pagos (
+    id_pagos INT PRIMARY KEY AUTO_INCREMENT,
+    fecha_pago DATE NOT NULL,
+    pago_contado DECIMAL(10,2) DEFAULT 0,
+    pago_minimo DECIMAL(10,2) DEFAULT 0,
+    id_metodos_pago INT,
+    id_cuenta INT,
+    FOREIGN KEY (id_metodos_pago) REFERENCES tbl_metodos_pago(id_metodos_pago),
+    FOREIGN KEY (id_cuenta) REFERENCES tbl_cuenta(id_cuenta) ON DELETE CASCADE
+);
+
+/* creacion de tabla tbl_metodos_pago */
+CREATE TABLE IF NOT EXISTS tbl_metodos_pago (
+    id_metodos_pago INT PRIMARY KEY AUTO_INCREMENT,
+    nombre_metodo VARCHAR(45) NOT NULL
+);
+
+/*   creacion de tabla tbl_transacciones */
+CREATE TABLE IF NOT EXISTS tbl_transacciones (
+    id_transacciones INT PRIMARY KEY AUTO_INCREMENT,
+    fecha_consumo DATE NOT NULL,
+    fecha_operacion DATE NOT NULL,
+    concepto VARCHAR(45) NOT NULL,
+    compras_debitos DECIMAL(10,2) DEFAULT 0,
+    pagos_creditos DECIMAL(10,2) DEFAULT 0,
+    total_quetzales DECIMAL(10,2) DEFAULT 0,
+    total_dolares DECIMAL(10,2) DEFAULT 0,
+    id_cuenta INT,
+    FOREIGN KEY (id_cuenta) REFERENCES tbl_cuenta(id_cuenta) ON DELETE CASCADE
+);
+
+
